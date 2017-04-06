@@ -1,0 +1,37 @@
+MODULE user(semaphore, active)
+VAR
+  state: { idle, entering, critical, exiting };
+ASSIGN
+  init(state) := idle;
+  next(state) := case
+    state = idle & active: { idle, entering };
+    state = entering & !semaphore & active: critical;
+    state = critical & active: { critical, exiting };
+    state = exiting & active: idle;
+    TRUE: state;
+  esac;
+
+MODULE main
+VAR
+  semaphore: boolean;
+	running: 1..2; -- ID to keep track of which process is running
+  proc1: user(semaphore, next(running) = 1);
+  proc2: user(semaphore, next(running) = 2);
+ASSIGN
+  init(semaphore) := FALSE;
+  next(semaphore) := case
+    proc1.state = entering & proc1.active: TRUE;
+    proc1.state = exiting & proc1.active: FALSE;
+    proc2.state = entering & proc2.active: TRUE;
+    proc2.state = exiting & proc2.active: FALSE;
+    TRUE: semaphore;
+  esac;
+FAIRNESS
+  proc1.state = critical
+FAIRNESS
+  proc2.state = critical
+
+
+SPEC AG !(proc1.state = critical & proc2.state = critical); -- safety
+
+SPEC AG (proc1.state = entering -> AF proc1.state = critical); -- liveness
