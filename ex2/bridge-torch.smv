@@ -61,6 +61,6 @@ ASSIGN
   esac;
 
 LTLSPEC
-  !( G(count(traveling[0], traveling[1], traveling[2], traveling[3]) <= 2)
-     U (location[0] & location[1] & location[2] & location[3] & torch & 
-        time <= 17) )
+  !( (count(traveling[0], traveling[1], traveling[2], traveling[3]) <= 2)
+     U (location[0] & location[1] & location[2] & location[3] & torch & time <= 17) )
+
